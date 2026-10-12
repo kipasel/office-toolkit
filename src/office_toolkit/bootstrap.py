@@ -9,16 +9,23 @@ from office_toolkit.ui.main_window import MainWindow
 
 
 def bootstrap() -> QApplication:
-    """Bootstrap application: config, logging, Qt app, main window."""
+    """Bootstrap application: config, logging, Qt app, main window.
+
+    A strong reference to the main window is kept on the QApplication instance so the
+    window is not garbage-collected after this function returns.
+    """
     config = get_config()
     setup_logging(config)
 
-    app = QApplication(sys.argv)
+    app = QApplication.instance()
+    if app is None:
+        app = QApplication(sys.argv)
     app.setApplicationName("Office Toolkit")
     app.setOrganizationName("OfficeToolkit")
     app.setApplicationDisplayName("Office Toolkit")
 
     window = MainWindow(config)
     window.show()
+    app._main_window = window
 
     return app

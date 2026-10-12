@@ -37,3 +37,25 @@ def test_navigation_switch(app):
     assert nav.currentRow() == 0
     if hasattr(nav, 'close'):
         nav.close()
+
+
+def test_bootstrap_keeps_main_window_alive(app, tmp_path, monkeypatch):
+    """Regression: bootstrap() must keep the MainWindow from being garbage-collected."""
+    from office_toolkit import bootstrap as bootstrap_mod
+    from office_toolkit.bootstrap import bootstrap
+    from office_toolkit.core.config import AppConfig
+
+    cfg = AppConfig(
+        app_dir=tmp_path,
+        logs_dir=tmp_path / "logs",
+        cache_dir=tmp_path / "cache",
+        history_dir=tmp_path / "history",
+    )
+    cfg.ensure_dirs()
+    monkeypatch.setattr(bootstrap_mod, "get_config", lambda: cfg)
+    monkeypatch.setattr(bootstrap_mod, "setup_logging", lambda *a, **k: None)
+
+    qapp = bootstrap()
+    assert any(isinstance(w, MainWindow) for w in qapp.topLevelWidgets())
+    qapp._main_window.close()
+
