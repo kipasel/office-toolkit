@@ -47,6 +47,22 @@ bukan ketentuan Windows.
 - Jangan menimpa file tanpa izin eksplisit.
 - Jangan menghapus file input sebagai bagian pemrosesan normal.
 - Untuk operasi batch, laporkan sukses/gagal per file.
+- Operasi PDF (Phase 3) menulis ke file temporer `.pdf`, membuka ulang untuk memverifikasi jumlah
+  halaman, lalu `os.replace` atomik ke nama final. File temporer dibersihkan baik saat sukses
+  maupun gagal. Nama output disanitasi dan konflik nama tidak menimpa file yang ada.
+
+## 5a. Penanganan PDF Bermasalah (Phase 3)
+
+- File tidak ada/kosong/rusak/bukan PDF → `ValidationError` atau `DecodeError` yang jelas, bukan
+  sukses palsu.
+- PDF terenkripsi (perlu kata sandi) → ditolak dengan `PasswordError`. Kata sandi **tidak**
+  ditebak, tidak dipecahkan, dan tidak ditulis ke log/pesan/nama file.
+- Nomor/rentang halaman divalidasi terhadap jumlah halaman; rentang terbalik atau di luar batas
+  ditolak sebelum menulis output.
+- Folder tujuan tidak dapat ditulis → error sebelum proses; hasil parsial tidak ditinggalkan.
+- Batas ukuran input `max_input_mb` ditegakkan (`ResourceLimitError`).
+- Informasi PDF bersifat baca-saja; fitur tidak mengklaim PDF aman hanya karena dapat dibuka.
+- Keterbatasan pemeliharaan struktur (bookmark/form/metadata) didokumentasikan, bukan disembunyikan.
 
 ## 6. Kata Sandi & Rahasia
 

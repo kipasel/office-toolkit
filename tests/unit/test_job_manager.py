@@ -14,6 +14,17 @@ def app():
     return app
 
 
+def _wait_for(app, predicate, timeout: float = 3.0) -> bool:
+    deadline = time.time() + timeout
+    while time.time() < deadline:
+        if predicate():
+            return True
+        app.processEvents()
+        time.sleep(0.005)
+    app.processEvents()
+    return predicate()
+
+
 def test_job_success(app):
     jm = job_manager.JobManager()
     results = []
@@ -25,9 +36,7 @@ def test_job_success(app):
     jm.job_finished.connect(lambda jid, res: results.append(res))
     jid = jm.start_job(ok)
     assert jid.startswith("job_")
-    app.processEvents()
-    time.sleep(0.01)
-    app.processEvents()
+    assert _wait_for(app, lambda: results)
     assert results and results[0].success
     assert results[0].data["x"] == 1
 
@@ -41,9 +50,7 @@ def test_job_failure(app):
 
     jm.job_finished.connect(lambda jid, res: results.append(res))
     jm.start_job(bad)
-    app.processEvents()
-    time.sleep(0.01)
-    app.processEvents()
+    assert _wait_for(app, lambda: results)
     assert results and not results[0].success
     assert results[0].error
 
@@ -58,10 +65,8 @@ def test_job_progress_signals(app):
 
     jm.job_progress.connect(lambda jid, p: progressed.append(p))
     jm.start_job(with_progress)
-    app.processEvents()
-    time.sleep(0.01)
-    app.processEvents()
     # no progress emitted explicitly; just ensure no crash
+    assert _wait_for(app, lambda: True)
     assert True
 
 
@@ -76,8 +81,7 @@ def test_cancel_no_crash(app):
     jm.job_finished.connect(lambda jid, res: results.append(res))
     jid = jm.start_job(slow, can_cancel=True)
     jm.cancel_job(jid)
-    app.processEvents()
-    time.sleep(0.02)
-    app.processEvents()
-    # may cancel or finish; ensure handled
+    # may cancel or finish; ensure handled without crashing
+    _wait_for(app, lambda: results or jm._jobs.get(jid, {}).get("status") is not None)
     assert True
+

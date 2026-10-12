@@ -12,6 +12,7 @@ Status: rencana. Belum ada implementasi.
 - **Tanpa global mutable state** yang tidak perlu; konfigurasi lewat objek `AppConfig`.
 - **Thread-safe UI**: operasi berat dijalankan di worker Qt, komunikasi via signal/slot.
 - **Fondasi Phase 1** (IMPLEMENTED): `bootstrap`, `logging_config`, `errors`, `config`, `file_validation`, `output_manager`, `job_manager`, UI minimal + komponen reusable.
+- **PDF Toolkit Dasar** (IMPLEMENTED/TESTED): `services/pdf/processor.py` (info, merge, split, extract, reorder, rotate via PyMuPDF) dan `services/pdf/ui.py` (6 tab, worker `JobManager`).
 
 ## 2. Struktur Direktori (target)
 
@@ -89,8 +90,11 @@ Aturan: bukan satu file besar; setiap service punya tanggung jawab tunggal dan d
 - `logging_config.py` — logging lokal ke file, rotasi, redaksi path/secret.
 
 ### services
-- `pdf/` — `info`, `merge`, `split`, `extract`, `reorder`, `rotate`, `annotate`, `signature`,
-  `render` (PDF→gambar), `images_to_pdf`, `encrypt`.
+- `pdf/` — `info`, `merge`, `split`, `extract`, `reorder`, `rotate` **IMPLEMENTED** (Phase 3);
+  `annotate`, `signature`, `render` (PDF→gambar), `images_to_pdf`, `encrypt` menyusul.
+  Aturan: validasi → proses (PyMuPDF) → tulis lewat `OutputManager` (temporer + verifikasi +
+  `os.replace`) → kembalikan hasil terstruktur. Dokumen baru dibentuk via `insert_pdf`, sehingga
+  outline/metadata tidak dijamin dipertahankan (kecuali rotate yang memodifikasi salinan).
 - `images/` — `convert`, `resize`, `compress`, `target_size`, `crop`, `rotate`, `batch`,
   `strip_metadata`, `exif`.
 - `qr/` — `generate`, `export_svg`, `batch_from_csv`, `decode`.

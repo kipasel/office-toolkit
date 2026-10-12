@@ -1,7 +1,7 @@
 # TEST_PLAN.md — Rencana Pengujian Office Toolkit
 
-Versi: 0.1 (Phase 0)
-Status: rencana. Belum ada tes yang dijalankan.
+Versi: 0.3 (Phase 3 — PDF Toolkit Dasar)
+Status: berjalan. Fondasi (Phase 1) dan PDF Toolkit Dasar (A1–A7) sudah diuji otomatis.
 
 ## 1. Prinsip
 
@@ -54,16 +54,34 @@ UI test dijalankan dengan `QT_QPA_PLATFORM=offscreen` pada CI/headless.
 - Logging: konfigurasi lokal, rotasi, tidak memuat isi dokumen/kata sandi. **TESTED**
 - Validasi file: file tidak ada, kosong, path ilegal, baca/tulis aman. **TESTED**
 
-### 5.2 PDF (Phase 2)
-- Merge 2 PDF → jumlah halaman = total, urutan sesuai input.
-- Split rentang → halaman sesuai; rentang di luar batas ditolak dengan pesan jelas.
-- Extract & reorder → urutan halaman benar.
-- Rotate → orientasi halaman terpilih berubah, lainnya tetap.
-- Compress → PDF dapat dibuka; ukuran awal & akhir dilaporkan; bila tidak mengecil, dilaporkan.
-- PDF→gambar → dimensi sesuai pengaturan DPI.
-- Gambar→PDF → jumlah halaman benar.
-- PDF terenkripsi → meminta kata sandi bila perlu; kata sandi salah ditolak jelas.
-- File rusak → error jelas, bukan sukses palsu.
+### 5.2 PDF Toolkit Dasar (A1–A7) — TESTED
+
+Fixture sintetis: `tests/fixtures/pdf_factory.py` + fixture di `tests/conftest.py`
+(`sample_pdf` 5 halaman berlabel, `encrypted_pdf`, `corrupt_pdf`). Semua dokumen dibuat oleh kode
+tes; tidak memakai dokumen pengguna. Verifikasi urutan halaman memakai teks per halaman.
+
+- Info: jumlah halaman & ukuran benar; metadata kosong ditampilkan `None` (bukan error);
+  corrupt → `DecodeError`; terenkripsi → status dilaporkan tanpa membaca metadata. **TESTED**
+- Merge: urutan & jumlah halaman benar; input < 2 ditolak; input hilang ditolak; input terenkripsi
+  ditolak; file sumber tetap utuh; konflik nama → alternatif. **TESTED**
+- Split rentang: satu file per rentang; isi sesuai; rentang di luar batas ditolak. **TESTED**
+- Split per halaman: jumlah file = jumlah halaman; nama unik; tiap file 1 halaman. **TESTED**
+- Extract: halaman tunggal, urutan khusus, duplikat; di luar batas ditolak; sumber tetap utuh. **TESTED**
+- Reorder: urutan berubah sesuai permintaan; wajib permutasi penuh; duplikat/kelurangan ditolak. **TESTED**
+- Rotate: 90/180/270; halaman terpilih saja / semua; diverifikasi dengan membuka ulang file;
+  sudut & halaman tidak valid ditolak. **TESTED**
+- Keamanan & integrasi: sumber tak termodifikasi (hash), PDF terenkripsi ditolak tanpa cracking,
+  kata sandi tidak bocor ke pesan error, tidak ada file temporer tertinggal setelah gagal,
+  nama output ilegal disanitasi, batas ukuran input ditegakkan, integrasi worker `JobManager`. **TESTED**
+
+Perintah yang dijalankan (Windows, tanpa `.venv`):
+
+```powershell
+$env:QT_QPA_PLATFORM="offscreen"
+py -3.12 -m pytest
+```
+
+Hasil terakhir: **81 passed** (22 tes lama Phase 1/Phase 2 + 59 tes baru Phase 3).
 
 ### 5.3 Gambar (Phase 3)
 - Konversi format → file hasil dapat dibuka ulang oleh decoder yang benar.

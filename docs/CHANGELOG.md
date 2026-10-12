@@ -31,3 +31,30 @@ Format mengikuti prinsip Keep a Changelog; versi mengikuti SemVer.
 
 ### Updated
 - `docs/ARCHITECTURE.md`, `docs/FEATURE_MATRIX.md`, `docs/TEST_PLAN.md`, `docs/SECURITY.md`, `docs/CHANGELOG.md`.
+
+## [0.3.0] — Phase 3 — PDF Toolkit Dasar (A1–A7)
+
+### Added
+- `src/office_toolkit/services/pdf/processor.py` — info, merge, split (rentang & per halaman),
+  extract, reorder, dan rotate halaman berbasis PyMuPDF; validasi halaman, penanganan PDF
+  terenkripsi/rusak, dan penulisan output aman (temporer + verifikasi + `os.replace`).
+- `src/office_toolkit/services/pdf/ui.py` — halaman PDF Toolkit berbahasa Indonesia dengan enam tab;
+  operasi berat dijalankan lewat `JobManager` (UI tidak diblokir).
+- `src/office_toolkit/services/pdf/__init__.py` — ekspos `processor`.
+- `tests/fixtures/pdf_factory.py` + `tests/conftest.py` — fixture PDF sintetis (berlabel,
+  terenkripsi, rusak).
+- `tests/unit/test_pdf.py` (43), `tests/integration/test_pdf_integration.py` (2),
+  `tests/security/test_pdf_security.py` (11), `tests/ui/test_pdf_ui.py` (3).
+
+### Changed
+- `src/office_toolkit/ui/navigation.py` — menambahkan entri "PDF Toolkit" dan signal `page_requested`.
+- `src/office_toolkit/ui/main_window.py` — menghubungkan halaman PDF ke `QStackedWidget`.
+- `tests/unit/test_job_manager.py` — menunggu sinyal dengan batas waktu (menghilangkan flakiness
+  lama; assertion tidak diubah/diperlemah).
+
+### Notes
+- Semua operasi memakai PyMuPDF; tidak ada dependensi baru yang dipasang.
+- Keterbatasan: bookmark/outline, XMP metadata, dan sebagian struktur formulir tidak dijamin
+  dipertahankan oleh merge/split/extract/reorder (dibangun via `insert_pdf`).
+- Hasil tes: **81 passed** (59 tes baru Phase 3 + 22 tes regresi Phase 1/Phase 2).
+- Status fitur A1–A7: **TESTED** (belum VERIFIED; menunggu verifikasi/penerimaan pengguna).

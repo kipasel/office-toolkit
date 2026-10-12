@@ -2,6 +2,7 @@ from PySide6.QtWidgets import QMainWindow, QStackedWidget, QHBoxLayout, QWidget
 from PySide6.QtCore import Qt
 
 from office_toolkit.core.config import AppConfig
+from office_toolkit.services.pdf.ui import PdfToolkitPage
 from .navigation import Navigation
 from .dashboard import Dashboard
 
@@ -21,13 +22,17 @@ class MainWindow(QMainWindow):
         self.nav = Navigation()
         self.stack = QStackedWidget()
         self.dashboard = Dashboard()
+        self.pdf_page = PdfToolkitPage()
         self.stack.addWidget(self.dashboard)
+        self.stack.addWidget(self.pdf_page)
 
         layout.addWidget(self.nav)
         layout.addWidget(self.stack, 1)
 
         self.setCentralWidget(central)
-        self.nav.home_requested.connect(self._go_home)
+        self.nav.page_requested.connect(self._on_page)
+        self.nav.setCurrentRow(0)
 
-    def _go_home(self):
-        self.stack.setCurrentWidget(self.dashboard)
+    def _on_page(self, index: int):
+        if 0 <= index < self.stack.count():
+            self.stack.setCurrentIndex(index)
