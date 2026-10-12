@@ -42,7 +42,7 @@ bukan ketentuan Windows.
 
 ## 5. Penulisan Output & Integritas
 
-- Tulis ke file temporer di direktori tujuan, lalu `os.replace` (atomik) ke nama final.
+- OutputManager mendukung penulisan temp di direktori tujuan, sanitasi nama, deteksi konflik & alternatif; tidak menimpa tanpa izin.
 - Bila gagal/dibatalkan: hapus temporer; jangan meninggalkan output korup yang tampak berhasil.
 - Jangan menimpa file tanpa izin eksplisit.
 - Jangan menghapus file input sebagai bagian pemrosesan normal.

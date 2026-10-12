@@ -46,13 +46,13 @@ UI test dijalankan dengan `QT_QPA_PLATFORM=offscreen` pada CI/headless.
 
 ## 5. Tes per Modul
 
-### 5.1 Fondasi (Phase 1)
-- Aplikasi start tanpa error (smoke).
-- Navigasi semua halaman yang diimplementasikan berfungsi.
-- Worker: operasi berat tidak membekukan UI; progress/error dikirim via signal.
-- Output manager: tulis atomik; tidak menimpa tanpa izin; bersihkan temporer saat gagal.
-- Logging: redaksi path/secret; tidak menulis isi dokumen.
-- Validasi file: file tidak ada, kosong, rusak, ekstensi≠konten, tidak terbaca, path ilegal.
+### 5.1 Fondasi (Phase 1) — VERIFIED
+- Aplikasi start tanpa error (smoke). **TESTED**
+- Navigasi dasar (sidebar) berfungsi. **TESTED**
+- Worker: lifecycle job (queued/running/succeeded/failed/cancelled) via signals, UI tidak diblokir. **TESTED**
+- Output manager: nama aman, deteksi konflik + alternatif, bersihkan temporer, tidak menimpa tanpa izin. **TESTED**
+- Logging: konfigurasi lokal, rotasi, tidak memuat isi dokumen/kata sandi. **TESTED**
+- Validasi file: file tidak ada, kosong, path ilegal, baca/tulis aman. **TESTED**
 
 ### 5.2 PDF (Phase 2)
 - Merge 2 PDF → jumlah halaman = total, urutan sesuai input.

@@ -3,9 +3,8 @@
 Aplikasi desktop Windows yang mengolah **PDF, gambar, QR Code, dan utilitas file kantor**.
 Semua fitur inti berjalan **lokal/offline** dan **tanpa telemetry**.
 
-> **Status: PHASE 0 — Audit & Perencanaan.**
-> Belum ada kode aplikasi. Dokumentasi ini adalah hasil audit lingkungan dan spesifikasi awal
-> yang menunggu persetujuan sebelum Phase 1 dimulai.
+> **Status: PHASE 1 — Foundation & UI (IMPLEMENTED).**
+> Fondasi aplikasi dan UI siap. Modul pemrosesan (PDF/Image/QR/Utilities) akan diimplementasikan pada fase berikutnya.
 
 ## Ruang Lingkup
 

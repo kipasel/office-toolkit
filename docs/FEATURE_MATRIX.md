@@ -11,15 +11,15 @@ Legenda tes: `—` belum ada.
 
 | ID | Fitur | Status | Tes | Catatan |
 |---|---|---|---|---|
-| F1 | Konfigurasi proyek (pyproject, requirements) | NOT IMPLEMENTED | — | Phase 1 |
-| F2 | Entry point & bootstrap | NOT IMPLEMENTED | — | Phase 1 |
-| F3 | Logging lokal + redaksi | NOT IMPLEMENTED | — | Phase 1 |
-| F4 | Hierarki error | NOT IMPLEMENTED | — | Phase 1 |
-| F5 | Validasi file | NOT IMPLEMENTED | — | Phase 1 |
-| F6 | Output manager (tulis atomik) | NOT IMPLEMENTED | — | Phase 1 |
-| F7 | Job manager + worker Qt | NOT IMPLEMENTED | — | Phase 1 |
-| F8 | Main window + navigasi + dashboard | NOT IMPLEMENTED | — | Phase 1 |
-| F9 | Komponen UI dasar | NOT IMPLEMENTED | — | Phase 1 |
+| F1 | Konfigurasi proyek (pyproject, requirements) | IMPLEMENTED | TESTED | Phase 1 — 15 unit+UI tests lulus |
+| F2 | Entry point & bootstrap | IMPLEMENTED | TESTED | Phase 1 |
+| F3 | Logging lokal + redaksi | IMPLEMENTED | TESTED | Phase 1 |
+| F4 | Hierarki error | IMPLEMENTED | TESTED | Phase 1 |
+| F5 | Validasi file | IMPLEMENTED | TESTED | Phase 1 |
+| F6 | Output manager | IMPLEMENTED | TESTED | Phase 1 |
+| F7 | Job manager + worker Qt | IMPLEMENTED | TESTED | Phase 1 |
+| F8 | Main window + navigasi + dashboard | IMPLEMENTED | TESTED | Phase 1 |
+| F9 | Komponen UI dasar | IMPLEMENTED | TESTED | FileSelector, FolderSelector, PlaceholderPage, Theme |
 
 ## Modul A — PDF Toolkit (Phase 2)
 

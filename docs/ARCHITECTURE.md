@@ -11,6 +11,7 @@ Status: rencana. Belum ada implementasi.
 - **Testable**: service dipanggil tanpa UI; fixture sintetis untuk pengujian.
 - **Tanpa global mutable state** yang tidak perlu; konfigurasi lewat objek `AppConfig`.
 - **Thread-safe UI**: operasi berat dijalankan di worker Qt, komunikasi via signal/slot.
+- **Fondasi Phase 1** (IMPLEMENTED): `bootstrap`, `logging_config`, `errors`, `config`, `file_validation`, `output_manager`, `job_manager`, UI minimal + komponen reusable.
 
 ## 2. Struktur Direktori (target)
 
