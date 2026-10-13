@@ -1,6 +1,6 @@
 # SECURITY.md — Keamanan, Privasi, dan Sumber Daya
 
-Versi: 0.1 (Phase 0)
+Versi: 0.5 (Phase 5 — QR Toolkit)
 
 ## 1. Model Ancaman Ringkas
 
@@ -64,6 +64,51 @@ bukan ketentuan Windows.
 - Informasi PDF bersifat baca-saja; fitur tidak mengklaim PDF aman hanya karena dapat dibuka.
 - Keterbatasan pemeliharaan struktur (bookmark/form/metadata) didokumentasikan, bukan disembunyikan.
 
+## 5b. PDF Lanjutan (Phase 4)
+
+- **DPI render** sebagai kebijakan aplikasi: `pdf_render_dpi_min=36`, `pdf_render_dpi_max=600`
+  (nilai konfigurasi). Render per halaman (tidak memuat seluruh halaman sekaligus) dan dibatasi
+  `max_pdf_pages_render` (5.000 halaman).
+- **Piksel gambar** dibatasi `max_image_pixels` (100 MP) untuk semua operasi yang membaca bitmap
+  (tambah gambar, gambar→PDF). Pelanggaran → `ResourceLimitError` (fail-fast), tidak diteruskan
+  sebagai "gagal per file".
+- **Kompresi**: tidak menjanjikan hasil lebih kecil. `savings_pct` mengikuti rumus resmi
+  `(awal-hasil)/awal×100`; hasil lebih besar dilaporkan jujur. Mode `rasterize` menghapus
+  teks/tautan/bookmark/formulir dan **wajib** menampilkan peringatan eksplisit sebelum menjalankan.
+  Mode `images` bersifat lossy (rekompresi JPEG) dan diberi peringatan.
+- **Tanda tangan gambar** hanya gambar: peringatan wajib bahwa itu **bukan** tanda tangan digital
+  bersertifikat (tanpa identitas/integritas kriptografis) dan tidak dapat dijamin keasliannya.
+- **Proteksi kata sandi** (Fitur H): enkripsi AES-256/AES-128 via PyMuPDF; hasil dibuka ulang
+  dengan kata sandi untuk mencek `needs_pass` dan jumlah halaman sebelum rename atomik.
+  Kata sandi tidak pernah masuk pesan error, nama file, log, atau riwayat. Izin dokumen
+  (print/copy/modify/annotate) bersifat himbauan: penegakannya berbeda antar viewer dan bukan
+  kontrol akses. Proteksi ≠ jaminan absolut terhadap semua metode serangan (diberi peringatan).
+- **Buka proteksi** (Fitur I): hanya dengan kata sandi yang diketahui; tidak pernah mencoba
+  memecah/menyiasati proteksi. PDF tanpa proteksi ditolak (`ValidationError`). Hasil diduplikasi ke
+  dokumen baru (rebuild) agar saluran konten benar-benar terdekripsi; konsekuensi: bookmark/
+  metadata tidak dijamin dipertahankan (didokumentasikan).
+- **Kendala PyMuPDF 1.28.x (dihindari)**: membaca `doc.needs_pass`/`is_encrypted` **setelah**
+  `authenticate()` berhasil dapat membuat saluran konten tidak lagi terdekripsi (hasil output
+  terbaca kosong). Implementasi menghindari hal ini dengan (1) mensyaratkan sandi sebelum proses
+  dan (2) menentukan status proteksi lewat probe terpisah (`_open_probe`) yang tidak diautentikasi.
+
+## 5c. QR Toolkit (Phase 5)
+
+- **Baca QR**: gambar divalidasi Pillow lebih dulu (bukan ekstensi), dibatasi `max_image_pixels`;
+  decode berjalan dengan guard `qr_decode_timeout_sec` (deafult 30 dtk) → pelanggaran
+  `ResourceLimitError` (fail-fast). Payload hasil decode hanya teks di layar: **tidak pernah
+  di-log, tidak dibuka sebagai URL, dan tidak dieksekusi**.
+- **Generate & ekspor**: PNG/SVG ditulis ke file temporer, diverifikasi (Pillow reopen / XML
+  parse) sebelum `os.replace` atomik; temporer dibersihkan saat sukses/gagal. Nama disanitasi
+  (karakter ilegal Windows), traversal dicegah, konflik nama memakai alternatif (`x_1.png`) —
+  tidak pernah menimpa diam-diam.
+- **Logo**: menutupi modul QR → peringatan wajib bahwa QR berlogo **TIDAK dijamin** terbaca;
+  fraksi dibatasi `MAX_LOGO_FRACTION` (30%). Ekspor SVG **menolak logo** (error eksplisit).
+- **Batch CSV**: header wajib unik & non-kosong; sel konten kosong pada baris terisi dicatat
+  gagal per baris (baris fisik 1-based); baris sepenuhnya kosong dilewati; cache file/folder
+  tujuan divalidasi; sumber CSV tidak pernah dimodifikasi.
+- **Kontras warna**: fg/bg harus `#RRGGBB`; rasio WCAG < 3.0 memicu peringatan keterbacaan.
+
 ## 6. Kata Sandi & Rahasia
 
 - Kata sandi PDF tidak ditulis ke log, riwayat, atau nama file.
@@ -94,7 +139,8 @@ bukan ketentuan Windows.
 | pypdf | BSD-3-Clause | Sertakan notice. |
 | Pillow | MIT-CMU | Sertakan notice. |
 | qrcode | BSD-2-Clause | Sertakan notice. |
-| zxing-cpp | Apache-2.0 | Sertakan notice. |
+| opencv-python-headless | Apache-2.0 | Sertakan notice. Pengganti zxing-cpp (diblokir Smart App Control; lihat SPECIFICATION §12). |
+| numpy | BSD-3-Clause | Sertakan notice. Dependensi opencv-headless. |
 | pytest / pytest-qt | MIT | Dev-only, tidak didistribusikan. |
 | PyInstaller | GPL-2.0 + bootloader exception | Boleh packaging aplikasi non-GPL. |
 

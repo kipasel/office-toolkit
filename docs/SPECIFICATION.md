@@ -38,7 +38,8 @@ index yang tersedia di environment audit. Nomor versi diambil dari metadata pake
 | pypdf | 6.20.0 | Operasi struktural PDF (merge/split/encrypt ringan) | 402 KB | BSD-3-Clause |
 | pillow | 11.3.0 | Pengolahan gambar | (terpasang) | MIT-CMU |
 | qrcode | 8.2 | Generate QR (PNG/SVG) | 46 KB | BSD-2-Clause |
-| zxing-cpp | 3.1.1 | Baca/decode QR Code | 1.0 MB | Apache-2.0 |
+| opencv-python-headless | 4.11.0.86 | Baca/decode QR Code | ~39 MB | Apache-2.0 |
+| numpy | 2.5.4 | Pendukung OpenCV (array) | ~15 MB | BSD-3-Clause |
 | pikepdf | 9.11.0 | Enkripsi/buka proteksi PDF | (terpasang) | MPL-2.0 |
 
 ### 3.2 Development
@@ -52,13 +53,19 @@ index yang tersedia di environment audit. Nomor versi diambil dari metadata pake
 ### 3.3 Keputusan dependensi yang perlu konfirmasi
 
 1. **QR decoder: `zxing-cpp` (1 MB) vs `opencv-python-headless` (39,4 MB + numpy ~15 MB).**
-   Rekomendasi: **zxing-cpp** — wheel cp312 tersedia, decoder murni QR/barcode tanpa menarik
-   numpy, jauh lebih kecil untuk packaging. OpenCV hanya dipertimbangkan bila zxing terbukti gagal
-   menangani kasus yang disyaratkan. Spec mengizinkan "OpenCV atau library lokal yang sesuai".
+   Status (Phase 5): `zxing-cpp==3.1.1` **diblokir Smart App Control** di environment pengembangan —
+   `ImportError: DLL load failed ... An Application Control policy has blocked this file`. Wheel
+   memang tersedia, tetapi berkas `.pyd` yang tidak ditandatangani tidak diizinkan dimuat oleh
+   kebijakan sistem. Alternatif `opencv-python-headless==4.11.0.86` + `numpy==2.5.4` **terverifikasi
+   dimuat & mendecode QR** (round-trip generate→decode) pada mesin yang sama dan **disetujui pengguna
+   sebagai pengganti**. Dampak: ukuran distribusi +~54 MB; decoder memakai `cv2.QRCodeDetector`
+   (deteksi dan decode lebih dari satu QR via `detectAndDecodeMulti`). Priortas tetap: satu decoder
+   saja, tanpa API eksternal, offline.
 2. **`pikepdf` 9.11.0 (terpasang, MPL-2.0)** — kandidat untuk enkripsi/dekripsi PDF yang lebih
    tahan banting. Belum dimasukkan ke daftar terkunci. Perlu keputusan bila PyMuPDF/pypdf kurang
    andal untuk kasus enkripsi.
-3. **`numpy`** — saat ini tidak diperlukan bila memilih zxing-cpp.
+3. **`numpy`** — kini **wajib** sebagai dependensi OpenCV 4.x (wheel OpenCV untuk Python 3.12
+   bergantung pada numpy). Terkunci `numpy==2.5.4`.
 
 Catatan lisensi: `pymupdf` berlisensi **AGPL-3.0**. Ini memengaruhi distribusi. Perlu keputusan
 pengguna (lihat bagian 12 dan `docs/SECURITY.md`).
@@ -204,7 +211,8 @@ Bila input melebihi batas, tolak dengan pesan jelas (bukan crash).
 
 Lihat juga akhir laporan Phase 0. Ringkasan:
 
-1. QR decoder: **zxing-cpp** (disetujui).
+1. QR decoder: **opencv-python-headless 4.11.0.86 + numpy 2.5.4** (disetujui pengguna Phase 5 —
+   pengganti zxing-cpp yang diblokir Smart App Control; verifikasi load & decode pada mesin sasaran).
 2. Lisensi PyMuPDF (AGPL-3.0): **Terima AGPL – aplikasi akan dipublikasikan sesuai AGPL-3.0**.
 3. `pikepdf` (9.11.0, MPL-2.0): **ditambahkan** untuk enkripsi/buka proteksi PDF.
 4. Target distribusi: **onedir** (disetujui).

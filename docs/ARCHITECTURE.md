@@ -1,7 +1,8 @@
 # ARCHITECTURE.md — Arsitektur Office Toolkit
 
-Versi: 0.1 (Phase 0)
-Status: rencana. Belum ada implementasi.
+Versi: 0.5 (Phase 5)
+Status: berjalan. Fondasi (Phase 1), PDF Toolkit Dasar (A1–A7), PDF Toolkit Lanjutan (A8–A14),
+dan QR Toolkit (C1–C6) IMPLEMENTED/TESTED.
 
 ## 1. Prinsip Arsitektur
 
@@ -13,6 +14,11 @@ Status: rencana. Belum ada implementasi.
 - **Thread-safe UI**: operasi berat dijalankan di worker Qt, komunikasi via signal/slot.
 - **Fondasi Phase 1** (IMPLEMENTED): `bootstrap`, `logging_config`, `errors`, `config`, `file_validation`, `output_manager`, `job_manager`, UI minimal + komponen reusable.
 - **PDF Toolkit Dasar** (IMPLEMENTED/TESTED): `services/pdf/processor.py` (info, merge, split, extract, reorder, rotate via PyMuPDF) dan `services/pdf/ui.py` (6 tab, worker `JobManager`).
+- **PDF Toolkit Lanjutan** (IMPLEMENTED/TESTED): `services/pdf/{common,compress,render,from_images,edit,security}.py` dan `services/pdf/advanced_ui.py` (9 tab, worker `JobManager`).
+- **QR Toolkit** (IMPLEMENTED/TESTED): `services/qr/{common,generator,csv_batch,decoder}.py` dan
+  `services/qr/ui.py` (3 tab, worker `JobManager`). Generate memakai `qrcode` (PNG/SVG); decode
+  memakai OpenCV `QRCodeDetector` (opencv-python-headless) — pengganti zxing-cpp yang diblokir
+  Smart App Control pada mesin pengembangan (persetujuan pengguna, lihat SPECIFICATION §12).
 
 ## 2. Struktur Direktori (target)
 
@@ -90,14 +96,24 @@ Aturan: bukan satu file besar; setiap service punya tanggung jawab tunggal dan d
 - `logging_config.py` — logging lokal ke file, rotasi, redaksi path/secret.
 
 ### services
-- `pdf/` — `info`, `merge`, `split`, `extract`, `reorder`, `rotate` **IMPLEMENTED** (Phase 3);
-  `annotate`, `signature`, `render` (PDF→gambar), `images_to_pdf`, `encrypt` menyusul.
+- `pdf/` — **Dasar** `processor.py` (info, merge, split, extract, reorder, rotate) **IMPLEMENTED**
+  (Phase 3). **Lanjutan** (Phase 4) **IMPLEMENTED**: `common.py` (buka PDF sadar kata sandi,
+  tulis terverifikasi, resolusi halaman, nama aman, rumus penghematan, batas render),
+  `compress.py` (struktur/images/rasterize), `render.py` (PDF→PNG/JPEG),
+  `from_images.py` (gambar→PDF), `edit.py` (teks, gambar, anotasi, tanda tangan gambar),
+  `security.py` (proteksi & buka proteksi). `advanced_ui.py` menyediakan 9 tab UI.
   Aturan: validasi → proses (PyMuPDF) → tulis lewat `OutputManager` (temporer + verifikasi +
-  `os.replace`) → kembalikan hasil terstruktur. Dokumen baru dibentuk via `insert_pdf`, sehingga
-  outline/metadata tidak dijamin dipertahankan (kecuali rotate yang memodifikasi salinan).
+  `os.replace`) → kembalikan hasil terstruktur. Dokumen baru dibentuk via `insert_pdf` (termasuk
+  rebuild pada buka proteksi), sehingga outline/metadata tidak dijamin dipertahankan (kecuali
+  rotate yang memodifikasi salinan).
 - `images/` — `convert`, `resize`, `compress`, `target_size`, `crop`, `rotate`, `batch`,
   `strip_metadata`, `exif`.
-- `qr/` — `generate`, `export_svg`, `batch_from_csv`, `decode`.
+- `qr/` — **IMPLEMENTED** (Phase 5): `common.py` (validasi input, warna `#RRGGBB`, kontras WCAG,
+  path output aman, tulis terverifikasi), `generator.py` (generate PNG/SVG C1–C4), `csv_batch.py`
+  (batch CSV C5), `decoder.py` (baca QR C6). `ui.py` menyediakan 3 tab (Buat QR, Batch CSV, Baca
+  QR). Aturan: validasi → proses (qrcode/OpenCV) → tulis lewat `OutputManager` (temporer +
+  verifikasi + `os.replace`) → kembalikan hasil terstruktur dengan peringatan. Payload QR tidak
+  pernah di-log dan URL tidak dibuka otomatis.
 - `files/` — `batch_rename`, `duplicate_scan`, `list_directory`, `format_text/csv/json`,
   `document_photo`, `history`.
 - `documents/` — pembersihan/formating teks ringan (bukan konversi dokumen penuh).
@@ -148,7 +164,7 @@ Aturan:
 | Operasi struktural PDF | pypdf | Merge/split/rotate berbasis objek, enkripsi ringan |
 | Gambar | Pillow | Konversi, resize, EXIF, transparansi |
 | Generate QR | qrcode | PNG via Pillow, SVG via `qrcode.image.svg` |
-| Decode QR | zxing-cpp | Rekomendasi; alternatif OpenCV (lihat SPECIFICATION) |
+| Decode QR | opencv-python-headless | `QRCodeDetector`; pengganti zxing-cpp (diblokir Smart App Control) |
 | UI | PySide6 | Qt 6 |
 | Tes | pytest, pytest-qt | Fixture sintetis |
 | Build | PyInstaller | onedir default |
@@ -156,7 +172,9 @@ Aturan:
 ## 7. Risiko Arsitektur
 
 - **AGPL PyMuPDF** memengaruhi model distribusi (lihat SECURITY/SPECIFICATION).
-- **zxing-cpp** lebih kecil tetapi cakupan decode perlu diuji terhadap kasus nyata.
+- **opencv-python-headless** lebih besar daripada zxing-cpp, tetapi terverifikasi dapat memuat &
+  mendekode QR pada mesin pengembangan (zxing-cpp diblokir Smart App Control). Cakupan decode tetap
+  perlu diuji terhadap kasus nyata (barcode 1D tidak didukung).
 - Qt packaging (plugin platform, styles) perlu diuji pada build.
 - Operasi PDF yang menulis ulang dapat menghilangkan bookmark/form/tautan; perlu peringatan dan
   pemilihan operasi struktural (pypdf) bila akan mempertahankan struktur.

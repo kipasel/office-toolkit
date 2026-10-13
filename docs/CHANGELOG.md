@@ -58,3 +58,93 @@ Format mengikuti prinsip Keep a Changelog; versi mengikuti SemVer.
   dipertahankan oleh merge/split/extract/reorder (dibangun via `insert_pdf`).
 - Hasil tes: **81 passed** (59 tes baru Phase 3 + 22 tes regresi Phase 1/Phase 2).
 - Status fitur A1–A7: **TESTED** (belum VERIFIED; menunggu verifikasi/penerimaan pengguna).
+
+## [0.4.0] — Phase 4 — PDF Toolkit Lanjutan (A8–A14)
+
+### Added
+- `src/office_toolkit/services/pdf/common.py` — helper bersama: buka PDF (sadar kata sandi, tanpa
+  password di pesan), tulis PDF/gambar hasil terverifikasi, resolusi halaman, nama output aman,
+  rumus `savings_pct`, batas render (DPI & jumlah halaman).
+- `src/office_toolkit/services/pdf/compress.py` — Fitur A: kompresi mode `struktur` (lossless),
+  `images` (lossy `rewrite_images`), `rasterize` (dengan peringatan eksplisit).
+- `src/office_toolkit/services/pdf/render.py` — Fitur B: render PDF→PNG/JPEG per halaman,
+  `_page_00N`, batas DPI 36–600, laporan gagal per halaman.
+- `src/office_toolkit/services/pdf/from_images.py` — Fitur C: gambar→PDF (A4/Letter/ukuran gambar,
+  orientasi, transparansi, EXIF, frame-1 TIFF/GIF dengan peringatan, gambar rusak per-file).
+- `src/office_toolkit/services/pdf/edit.py` — Fitur D–G: tambah teks (kotak teks, fallback font
+  Unicode), tambah gambar (rasio aspek dipertahankan, dibatasi agar tak keluar halaman), anotasi
+  (highlight tanpa highlight palsu, note, rect, line/arrow), dan tanda tangan gambar (dengan
+  peringatan BUKAN tanda tangan digital).
+- `src/office_toolkit/services/pdf/security.py` — Fitur H–I: proteksi AES-256/128 dengan izin
+  dokumen; buka proteksi hanya dengan kata sandi diketahui (rebuild dokumen, tidak pernah cracking).
+- `src/office_toolkit/services/pdf/advanced_ui.py` — halaman "PDF Lanjutan" berbahasa Indonesia,
+  9 tab; operasi berat lewat `JobManager`; konfirmasi untuk rasterize, tanda tangan, dan buka proteksi.
+- `src/office_toolkit/core/config.py` — batas DPI render (`pdf_render_dpi_min=36`,
+  `pdf_render_dpi_max=600`).
+- Tests: `tests/unit/test_pdf_compress.py` (10), `test_pdf_render.py` (9), `test_pdf_from_images.py`
+  (12), `test_pdf_edit.py` (10), `test_pdf_annotate.py` (9), `test_pdf_security_advanced.py` (10),
+  `tests/security/test_pdf_advanced_security.py` (7), `tests/integration/test_pdf_advanced_integration.py`
+  (2), `tests/ui/test_pdf_advanced_ui.py` (3).
+
+### Changed
+- `src/office_toolkit/services/pdf/__init__.py` — ekspos `compress`, `edit`, `from_images`,
+  `processor`, `render`, `security`.
+- `src/office_toolkit/ui/navigation.py` — entri "PDF Lanjutan".
+- `src/office_toolkit/ui/main_window.py` — `PdfAdvancedPage` di stack (index 2).
+- `tests/ui/test_pdf_ui.py` — navigasi kini mengecek 3 halaman (regresi 2→3, diperbarui jujur).
+- `tests/fixtures/pdf_factory.py` — helper `make_pdf_with_image`.
+- `docs/FEATURE_MATRIX.md` (0.4), `docs/TEST_PLAN.md` (0.4, §5.2b), `docs/SECURITY.md` (5b),
+  `docs/CHANGELOG.md`.
+
+### Notes
+- Kendala PyMuPDF 1.28.x yang dihindari: membaca `doc.needs_pass` setelah `authenticate`
+  merusak saluran konten; status proteksi diambil lewat probe terpisah, dan `decrypt` rebuild
+  halaman ke dokumen baru (bookmark/metadata tidak dijamin).
+- `pytest-qt` tetap belum terpasang; tes UI memakai `QApplication` offscreen manual.
+- Hasil tes: **156 passed, 1 warning** (74 tes baru Phase 4 + 82 tes regresi).
+- Status fitur A8–A14: **TESTED** (belum VERIFIED; menunggu verifikasi/penerimaan pengguna).
+
+## [0.5.0] — Phase 5 — QR Toolkit (C1–C6)
+
+### Added
+- `src/office_toolkit/services/qr/common.py` — helper bersama: batas ukuran input, validasi tabel
+  CSV, warna `#RRGGBB`, rasio kontras WCAG (ambang 3.0), path output aman, penulisan terverifikasi
+  (temporer → verifikasi → `os.replace`).
+- `src/office_toolkit/services/qr/generator.py` — Fitur C1–C4: generate QR (teks/URL/nomor) dengan
+  `qrcode`, desain (box_size, quiet zone, warna, ECC L/M/Q/H), logo tengah opsional (fraksi ≤ 30%,
+  peringatan keterbacaan), ekspor PNG (verifikasi reopen Pillow) dan SVG (parse XML; logo ditolak
+  dengan error jelas).
+- `src/office_toolkit/services/qr/csv_batch.py` — Fitur C5: batch CSV (UTF-8 ± BOM), kolom isi +
+  nama opsional, progress callback, kegagalan per baris fisik, sanitasi nama & anti-traversal,
+  anti-overwrite, `preview_csv` untuk UI.
+- `src/office_toolkit/services/qr/decoder.py` — Fitur C6: baca QR dari gambar lokal via OpenCV
+  `QRCodeDetector` (opencv-python-headless), multi-QR, guard timeout
+  (`qr_decode_timeout_sec`) & batas piksel; payload tidak pernah di-log/dibuka.
+- `src/office_toolkit/services/qr/ui.py` + `src/office_toolkit/services/qr/__init__.py` —
+  halaman "QR Toolkit" berbahasa Indonesia: tab "Buat QR" (pratinjau asli + ekspor), "Batch dari
+  CSV" (pemilih kolom, progress), "Baca QR".
+- `tests/fixtures/qr_factory.py` — fixture QR/gambar/logo/CSV sintetis.
+- Tests: `tests/unit/test_qr_generator.py` (14), `test_qr_export.py` (13), `test_qr_logo.py` (6),
+  `test_qr_csv.py` (17), `test_qr_decoder.py` (10), `tests/security/test_qr_security.py` (10),
+  `tests/integration/test_qr_integration.py` (4), `tests/ui/test_qr_ui.py` (8). Total 82.
+
+### Changed
+- **Keputusan dependensi (disetujui pengguna):** `zxing-cpp` diganti `opencv-python-headless`
+  (`4.11.0.86`) + `numpy` (`2.5.4`) karena import `.pyd` zxing-cpp diblokir Smart App Control pada
+  mesin pengembangan (lihat SPECIFICATION §3.3/§12). `qrcode==8.2` ditambahkan.
+- `requirements.txt`, `pyproject.toml` — pembaruan manifest dependensi.
+- `src/office_toolkit/ui/navigation.py` — entri "QR Toolkit" (index 3).
+- `src/office_toolkit/ui/main_window.py` — `QrToolkitPage` ditambahkan ke stack.
+- `tests/ui/test_pdf_ui.py`, `tests/ui/test_pdf_advanced_ui.py` — navigasi mengecek 4 halaman
+  (regresi 3→4, diperbarui jujur).
+- `docs/SPECIFICATION.md` (§3.1/§3.3/§12), `docs/FEATURE_MATRIX.md` (0.5), `docs/TEST_PLAN.md`
+  (0.5, §5.2c), `docs/SECURITY.md` (5c & lisensi), `docs/ARCHITECTURE.md`, `README.md`.
+
+### Notes
+- QR berlogo **TIDAK dijamin** tetap dapat dipindai (peringatan eksplisit di UI & output).
+- Ekspor SVG menolak logo (error eksplisit, bukan drop diam-diam).
+- Decoder mengganti zxing-cpp karena Smart App Control (`SmartAppControlState: On`) memblokir DLL;
+  implementasi fallback OpenCV diverifikasi membaca QR round-trip sebelum dipakai.
+- Hasil tes: **238 passed, 3 warnings** (82 tes baru Phase 5 + 156 tes regresi; 2 warning sporadic
+  libpyside + 1 `qt_api`).
+- Status fitur C1–C6: **TESTED** (belum VERIFIED; menunggu verifikasi/penerimaan pengguna).

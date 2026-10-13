@@ -29,9 +29,13 @@ def test_pdf_page_has_six_tabs(app):
 
 def test_main_window_navigates_to_pdf(app):
     win = MainWindow(AppConfig())
-    assert win.stack.count() == 2
+    assert win.stack.count() == 4
     win.nav.setCurrentRow(1)
     assert win.stack.currentIndex() == 1
+    win.nav.setCurrentRow(2)
+    assert win.stack.currentIndex() == 2
+    win.nav.setCurrentRow(3)
+    assert win.stack.currentIndex() == 3
     win.nav.setCurrentRow(0)
     assert win.stack.currentIndex() == 0
     win.close()

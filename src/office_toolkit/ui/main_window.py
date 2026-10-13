@@ -3,6 +3,8 @@ from PySide6.QtCore import Qt
 
 from office_toolkit.core.config import AppConfig
 from office_toolkit.services.pdf.ui import PdfToolkitPage
+from office_toolkit.services.pdf.advanced_ui import PdfAdvancedPage
+from office_toolkit.services.qr.ui import QrToolkitPage
 from .navigation import Navigation
 from .dashboard import Dashboard
 
@@ -23,8 +25,12 @@ class MainWindow(QMainWindow):
         self.stack = QStackedWidget()
         self.dashboard = Dashboard()
         self.pdf_page = PdfToolkitPage()
+        self.pdf_advanced_page = PdfAdvancedPage()
+        self.qr_page = QrToolkitPage()
         self.stack.addWidget(self.dashboard)
         self.stack.addWidget(self.pdf_page)
+        self.stack.addWidget(self.pdf_advanced_page)
+        self.stack.addWidget(self.qr_page)
 
         layout.addWidget(self.nav)
         layout.addWidget(self.stack, 1)

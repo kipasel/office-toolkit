@@ -11,6 +11,8 @@ class Navigation(QListWidget):
         self.setFixedWidth(220)
         self.addItem("Beranda")
         self.addItem("PDF Toolkit")
+        self.addItem("PDF Lanjutan")
+        self.addItem("QR Toolkit")
         self.currentRowChanged.connect(self._on_change)
 
     def _on_change(self, row: int):

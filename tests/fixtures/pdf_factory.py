@@ -52,6 +52,28 @@ def make_encrypted_pdf(
     return p
 
 
+def make_pdf_with_image(
+    path: str | Path,
+    labels: Sequence[str] = ("G1",),
+    size: Tuple[float, float] = DEFAULT_SIZE,
+    dpi: int = 200,
+) -> Path:
+    """Create a PDF whose pages have a label plus a raster image in the lower half."""
+    p = Path(path)
+    doc = pymupdf.open()
+    try:
+        for label in labels:
+            page = doc.new_page(width=size[0], height=size[1])
+            page.insert_text((10, 20), str(label), fontsize=12)
+            pix = page.get_pixmap(dpi=dpi)
+            rect = pymupdf.Rect(0, size[1] / 2, size[0], size[1])
+            page.insert_image(rect, pixmap=pix)
+        doc.save(str(p))
+    finally:
+        doc.close()
+    return p
+
+
 def make_corrupt_pdf(path: str | Path) -> Path:
     """Create a file with a PDF-looking header but invalid body."""
     p = Path(path)

@@ -9,6 +9,8 @@ class AppConfig:
     max_input_mb: int = 500
     max_image_pixels: int = 100_000_000
     max_pdf_pages_render: int = 5_000
+    pdf_render_dpi_min: int = 36
+    pdf_render_dpi_max: int = 600
     qr_decode_timeout_sec: int = 30
     max_csv_batch_rows: int = 100_000
 

@@ -1,7 +1,8 @@
 # TEST_PLAN.md — Rencana Pengujian Office Toolkit
 
-Versi: 0.3 (Phase 3 — PDF Toolkit Dasar)
-Status: berjalan. Fondasi (Phase 1) dan PDF Toolkit Dasar (A1–A7) sudah diuji otomatis.
+Versi: 0.5 (Phase 5 — QR Toolkit)
+Status: berjalan. Fondasi (Phase 1), PDF Toolkit Dasar (A1–A7), PDF Toolkit Lanjutan (A8–A14),
+dan QR Toolkit (C1–C6) sudah diuji otomatis.
 
 ## 1. Prinsip
 
@@ -13,7 +14,9 @@ Status: berjalan. Fondasi (Phase 1) dan PDF Toolkit Dasar (A1–A7) sudah diuji 
 ## 2. Perkakas
 
 - `pytest` 9.1.1 (test runner).
-- `pytest-qt` 4.5.0 (pengujian UI Qt; gunakan `qtbot`, mode `offscreen`).
+- UI diuji memakai `QApplication` offscreen (`QT_QPA_PLATFORM=offscreen`); **`pytest-qt` belum
+  terpasang** di environment — tes UI membuat instance `QApplication` secara manual (lihat
+  `tests/ui/`). Jangan klaim memakai `qtbot` sebelum terpasang dan dipakai sungguhan.
 - Fixture pembuat PDF/gambar/QR sintetis (modul `tests/fixtures/`).
 
 ## 3. Konfigurasi & Perintah
@@ -35,7 +38,8 @@ UI test dijalankan dengan `QT_QPA_PLATFORM=offscreen` pada CI/headless.
 
 | Fixture | Isi |
 |---|---|
-| `sample_pdf_n` | PDF N halaman (ukuran halaman diketahui) |
+| `sample_pdf` | PDF 5 halaman berlabel (dari `pdf_factory`) |
+| `pdf_with_image` | PDF berlabel + gambar raster (`make_pdf_with_image`) |
 | `encrypted_pdf` | PDF terenkripsi dengan kata sandi diketahui |
 | `corrupt_pdf` | File dengan header PDF rusak |
 | `sample_images` | PNG transparan, JPEG EXIF-orientation, TIFF multi-halaman, WebP, BMP |
@@ -83,6 +87,99 @@ py -3.12 -m pytest
 
 Hasil terakhir: **81 passed** (22 tes lama Phase 1/Phase 2 + 59 tes baru Phase 3).
 
+### 5.2b PDF Toolkit Lanjutan (A8–A14) — TESTED
+
+Implementasi: `src/office_toolkit/services/pdf/{common,compress,render,from_images,edit,security}.py`
++ UI `advanced_ui.py` (halaman "PDF Lanjutan", 9 tab). Skenario di bawah mengikuti fitur A–I pada
+prompt Phase 4; semua dites dengan dokumen sintetis.
+
+- A Kompresi: mode `struktur` mempertahankan teks & jumlah halaman; mode `images` mempertahankan
+  teks yang dapat dicari (lossy → peringatan); mode `rasterize` mempertahankan jumlah halaman dengan
+  peringatan eksplisit teks/tautan/bookmark/formulir **tidak** dipertahankan; mode/kualitas/DPI tidak
+  valid ditolak; sumber tidak berubah; `savings_pct` mengikuti rumus resmi (negatif = hasil lebih besar). **TESTED**
+- B Render: PNG/JPEG, semua/rentang halaman, penamaan `<stem>_page_00N`; DPI di luar 36–600 ditolak;
+  format tak dikenal ditolak; konflik nama → alternatif (tidak menimpa); halaman di luar rentang & PDF
+  terenkripsi ditolak; sumber tak berubah; render per halaman (tidak memuat seluruh dokumen sekaligus). **TESTED**
+- C Gambar→PDF: urutan dipertahankan; ukuran A4/Letter/ukuran gambar; orientasi landscape/portrait;
+  transparansi di-flatten atas warna latar; orientasi EXIF diterapkan; TIFF/GIF multi-halaman hanya
+  memakai frame pertama (peringatan); gambar rusak dilaporkan per-file tanpa membatalkan sisanya;
+  semua rusak → `ProcessingError`. **TESTED**
+- D Tambah teks: muncul di halaman target & terverifikasi baca ulang; beberapa halaman; koordinat di
+  luar halaman/teks kosong ditolak; Unicode → fallback font sistem atau peringatan (tanpa klaim
+  pemakaian font). **TESTED**
+- E Tambah gambar: rasio aspek dipertahankan; melebar/panjang dibatasi agar tidak keluar halaman
+  (peringatan); rentang halaman; gambar tak valid ditolak; sumber PDF & gambar tetap utuh. **TESTED**
+- F Anotasi: highlight hanya bila teks ditemukan; teks tidak ditemukan dilaporkan tanpa highlight palsu;
+  note (isi tidak bocor ke teks halaman), rect, line/arrow. **TESTED**
+- G Tanda tangan gambar: penempatan di halaman tertentu; peringatan eksplisit **BUKAN** tanda tangan
+  digital bersertifikat. **TESTED**
+- H Proteksi: file terenkripsi nyata (AES-256/128, `needs_pass`); kata sandi benar → dapat dibuka,
+  salah → ditolak tanpa bocor ke error; izin dokumen (print/copy) dihormati dan diverifikasi;
+  kata sandi kosong/<4 karakter atau algoritma tak dikenal ditolak; kata sandi tidak pernah masuk
+  nama file/log. **TESTED**
+- I Buka proteksi: hanya dengan kata sandi diketahui; PDF tak terproteksi ditolak; hasil tanpa sandi
+  dengan isi terverifikasi setara sumber. Dikenal kendala PyMuPDF 1.28.x (membaca `needs_pass`
+  setelah `authenticate` merusak saluran konten) — dihindari dengan probe terpisah. **TESTED**
+- Keamanan (A8–A14): sumber tak termodifikasi untuk semua operasi; tidak ada temp tertinggal setelah
+  gagal; kata sandi tidak bocor ke log/pesan; batas piksel & DPI ditegakkan; PDF terenkripsi ditolak
+  oleh operasi yang tidak menerima sandi. **TESTED**
+- Integrasi & UI: worker `JobManager` kompres→render round-trip; kegagalan worker dilaporkan;
+  halaman "PDF Lanjutan" punya 9 tab; navigasi utama sampai index 2; `_run` mematikan/menyalakan tombol. **TESTED**
+
+Perintah yang dijalankan (Windows, tanpa `.venv`):
+
+```powershell
+$env:QT_QPA_PLATFORM="offscreen"
+py -3.12 -m pytest
+```
+
+Hasil terakhir: **156 passed, 1 warning** (peringatan = `qt_api` tidak dikenal di `pyproject.toml`,
+diabaikan karena pytest-qt tidak digunakan).
+
+### 5.2c QR Toolkit (C1–C6) — TESTED
+
+Implementasi: `src/office_toolkit/services/qr/{generator,csv_batch,decoder,ui}.py` + fixture
+`tests/fixtures/qr_factory.py`. Semua QR dibuat dan dibaca dengan data sintetis (bukan dokumen
+pengguna). Round-trip memakai decoder nyata (OpenCV `QRCodeDetector`), bukan asumsi.
+
+- C1 Generate: teks/URL/nomor dengan Unicode; data kosong ditolak; data terlalu panjang ditolak
+  dengan pesan jelas. **TESTED**
+- C2 Desain: box_size/border/warna/ECC divalidasi; quiet zone < 0 atau box < 1 ditolak; warna harus
+  `#RRGGBB`; kontras WCAG < 3.0 memicu peringatan; ECC invalid ditolak; ECC lebih tinggi → QR lebih
+  besar. **TESTED**
+- C3 Logo: overlay mengubah piksel; peringatan keterbacaan wajib; missing/bukan-gambar → ditolak;
+  fraksi > 30% atau ≤ 0 ditolak; PNG berlogo tetap terbaca pada round-trip decode (ECC H). **TESTED**
+- C4 Ekspor: PNG dapat dibuka ulang Pillow & ukuran mengikuti desain & warna diterapkan; SVG valid
+  (parse XML, ada path, warna mengikuti); SVG + logo → error eksplisit; konflik nama → alternatif
+  (tidak menimpa); tidak ada temp tertinggal. **TESTED**
+- C5 Batch CSV: UTF-8 ± BOM; header wajib unik & non-kosong; baris kosong dilewati; sel konten
+  kosong → gagal per baris; kolom tidak ada → ditolak; nama opsional → fallback `qr_0001`;
+  nama sama → `x_1` (anti-overwrite); karakter ilegal / traversal disanitasi; SVG batch sukses;
+  SVG + logo ditolak; progress callback (1..N); batas `max_csv_batch_rows` → `ResourceLimitError`;
+  hasil per-baris terdecode benar. **TESTED**
+- C6 Baca QR: round-trip; multi-QR; `max_items`; gambar tanpa QR → `found=False`; file rusak →
+  `DecodeError`; file hilang → `ValidationError`; payload panjang tidak terpotong; batas piksel →
+  `ResourceLimitError`; timeout → `ResourceLimitError`. **TESTED**
+- Keamanan (QR): traversal via nama CSV diblokir (berada di dalam folder tujuan); tidak pernah
+  menimpa diam-diam (ekspor & batch); sumber CSV/gambar tidak termodifikasi (hash); payload tidak
+  pernah masuk log; tidak ada temp tertinggal; batas ukuran input ditegakkan; URL payload hanya
+  dikembalikan sebagai teks (tidak dibuka). **TESTED**
+- Integrasi & UI: worker `JobManager` generate→decode round-trip & batch→decode semua; kegagalan
+  worker dilaporkan; halaman "QR Toolkit" punya 3 tab (Buat QR / Batch CSV / Baca QR); navigasi
+  utama sampai index 3; pratinjau QR asli tampil & bersih saat data invalid; ekspor PNG via tombol
+  menulis file; tab decode menampilkan payload. **TESTED**
+
+Perintah yang dijalankan (Windows, tanpa `.venv`):
+
+```powershell
+$env:QT_QPA_PLATFORM="offscreen"
+py -3.12 -m pytest
+```
+
+Hasil terakhir: **238 passed, 3 warnings** (82 tes baru Phase 5 + 156 tes regresi; warning =
+`qt_api` tidak dikenal di `pyproject.toml` dan 2 peringatan sporadic libpyside pada penutupan
+QApplication).
+
 ### 5.3 Gambar (Phase 3)
 - Konversi format → file hasil dapat dibuka ulang oleh decoder yang benar.
 - Resize → dimensi sesuai (piksel/persentase).
@@ -92,13 +189,7 @@ Hasil terakhir: **81 passed** (22 tes lama Phase 1/Phase 2 + 59 tes baru Phase 3
 - Target KB → ukuran aktual ditampilkan; bila tak tercapai, dinyatakan gagal.
 - File rusak → tidak membuat aplikasi crash.
 
-### 5.4 QR (Phase 4)
-- Round-trip: generate → decode (zxing-cpp) → nilai sama dengan input.
-- PNG & SVG dapat dibuka pembaca yang sesuai.
-- CSV batch → jumlah output = jumlah baris valid; baris kosong diabaikan sesuai aturan.
-- Input kosong/invalid ditangani benar.
-- Logo opsional tidak merusak alur tanpa peringatan.
-- Decoder tidak dijalankan otomatis membuka URL.
+### 5.4 QR — sudah diuji di §5.2c (C1–C6, Phase 5)
 
 ### 5.5 File Utilities (Phase 4)
 - Rename preview sesuai harapan.
