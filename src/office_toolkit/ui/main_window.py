@@ -13,6 +13,7 @@ from office_toolkit.services.pdf.advanced_ui import PdfAdvancedPage
 from office_toolkit.services.qr.ui import QrToolkitPage
 from office_toolkit.services.images.ui import ImageToolkitPage
 from office_toolkit.ui.components.header import Header
+from office_toolkit.ui.styles.theme import style_tabs
 from .navigation import Navigation
 from .dashboard import Dashboard
 
@@ -61,6 +62,9 @@ class MainWindow(QMainWindow):
         self.stack.addWidget(self.qr_page)
         self.stack.addWidget(self.image_page)
         right_layout.addWidget(self.stack, 1)
+
+        for tabs in self.stack.findChildren(QTabWidget):
+            style_tabs(tabs)
 
         root.addWidget(self.nav)
         root.addWidget(right, 1)

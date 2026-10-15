@@ -78,7 +78,8 @@ def test_unavailable_tile_is_not_clickable(app):
 
 def test_sidebar_lists_pages_and_disabled_items(app):
     win = MainWindow(AppConfig())
-    assert win.nav.list.count() == 5
+    assert win.nav.list.count() == 4
+    assert win.nav.home_btn.isChecked()
     assert win.nav.more.count() == 2
     blocked = win.nav.more.item(0)
     assert not (blocked.flags() & Qt.ItemIsEnabled)

@@ -59,6 +59,9 @@ QMainWindow, QDialog {{
 }}
 
 /* ---- Sidebar ------------------------------------------------------- */
+#navigation {{
+    background: {c.DEEP_NAVY};
+}}
 #sidebar {{
     background: {c.DEEP_NAVY};
     border: none;
@@ -68,7 +71,7 @@ QMainWindow, QDialog {{
 #sidebar::item {{
     color: {c.NAVY_TEXT};
     padding: 11px 16px;
-    margin: 2px 10px;
+    margin: 3px 10px;
     border-radius: {Radius.MD}px;
 }}
 #sidebar::item:hover {{
@@ -95,6 +98,26 @@ QMainWindow, QDialog {{
     background: transparent;
     color: {c.NAVY_TEXT_MUTED};
 }}
+#navHomeButton {{
+    background: transparent;
+    color: {c.NAVY_TEXT};
+    border: none;
+    border-left: 3px solid transparent;
+    border-radius: {Radius.MD}px;
+    padding: 11px 16px;
+    margin: 3px 10px;
+    text-align: left;
+    font-weight: 600;
+}}
+#navHomeButton:hover {{
+    background: {c.NAVY_HOVER};
+    color: {c.WHITE};
+}}
+#navHomeButton:checked {{
+    background: {c.NAVY_ACTIVE};
+    color: {c.WHITE};
+    border-left: 3px solid {c.PRIMARY};
+}}
 #brandTitle {{
     color: {c.WHITE};
     font-size: {Fonts.H2}px;
@@ -107,13 +130,14 @@ QMainWindow, QDialog {{
 }}
 #brandBlock {{
     background: {c.DEEP_NAVY};
+    border-bottom: 1px solid {c.NAVY_HOVER};
 }}
 #navSectionLabel {{
     color: {c.NAVY_TEXT_MUTED};
     font-size: {Fonts.TINY}px;
     font-weight: 700;
-    letter-spacing: 1px;
-    padding: 4px 20px;
+    letter-spacing: 1.5px;
+    padding: 10px 20px 4px;
 }}
 #navFooter {{
     color: {c.NAVY_TEXT_MUTED};
@@ -295,20 +319,22 @@ QTabWidget::pane {{
     padding: {Spacing.MD}px;
 }}
 QTabBar::tab {{
-    background: transparent;
-    color: {c.TEXT_SECONDARY};
-    padding: 9px 16px;
-    margin-right: 4px;
+    background: {c.SURFACE_ALT};
+    border: 1px solid {c.DIVIDER};
+    padding: 8px 16px;
+    margin-right: 6px;
     border-radius: {Radius.MD}px;
     font-weight: 600;
 }}
 QTabBar::tab:hover {{
+    background: {c.PRIMARY_SOFT};
+    border-color: {c.PRIMARY_SOFT};
     color: {c.TEXT};
-    background: {c.SURFACE_ALT};
 }}
 QTabBar::tab:selected {{
-    color: {c.PRIMARY};
-    background: {c.SURFACE};
+    color: {c.WHITE};
+    background: {c.PRIMARY};
+    border-color: {c.PRIMARY};
 }}
 
 /* ---- Progress ------------------------------------------------------ */
@@ -411,6 +437,61 @@ QMessageBox {{
     background: {c.SURFACE};
 }}
 """
+
+
+_TAB_ACCENTS = (
+    Colors.PRIMARY,
+    Colors.ORANGE,
+    Colors.TEAL,
+    Colors.PURPLE,
+    Colors.CORAL,
+    Colors.GREEN,
+)
+
+
+def style_tabs(tabs) -> None:
+    """Give a ``QTabWidget`` colourful, per-tab accent styling.
+
+    Each tab label is tinted with an accent colour, and the selected tab plus
+    the surrounding pane are filled with that tab's accent so the workspace
+    reads as colour-coded without adding any dependency.
+    """
+
+    def apply() -> None:
+        bar = tabs.tabBar()
+        for i in range(tabs.count()):
+            bar.setTabTextColor(i, _TAB_ACCENTS[i % len(_TAB_ACCENTS)])
+        accent = _TAB_ACCENTS[max(tabs.currentIndex(), 0) % len(_TAB_ACCENTS)]
+        tabs.setStyleSheet(
+            f"QTabBar::tab {{\n"
+            f"    background: {Colors.SURFACE_ALT};\n"
+            f"    border: 1px solid {Colors.BORDER};\n"
+            f"    padding: 8px 16px;\n"
+            f"    margin-right: 6px;\n"
+            f"    border-top-left-radius: {Radius.MD}px;\n"
+            f"    border-top-right-radius: {Radius.MD}px;\n"
+            f"    font-weight: 600;\n"
+            f"}}\n"
+            f"QTabBar::tab:hover {{\n"
+            f"    background: {Colors.PRIMARY_SOFT};\n"
+            f"    border-color: {Colors.PRIMARY_SOFT};\n"
+            f"}}\n"
+            f"QTabBar::tab:selected {{\n"
+            f"    background: {accent};\n"
+            f"    color: {Colors.WHITE};\n"
+            f"    border-color: {accent};\n"
+            f"}}\n"
+            f"QTabWidget::pane {{\n"
+            f"    border: 1px solid {accent};\n"
+            f"    border-radius: {Radius.LG}px;\n"
+            f"    background: {Colors.SURFACE};\n"
+            f"    top: -1px;\n"
+            f"    padding: {Spacing.MD}px;\n"
+            f"}}\n"
+        )
+
+    tabs.currentChanged.connect(lambda _index: apply())
+    apply()
 
 
 def apply_theme(app: QApplication) -> None:
