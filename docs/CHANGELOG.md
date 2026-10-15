@@ -148,3 +148,74 @@ Format mengikuti prinsip Keep a Changelog; versi mengikuti SemVer.
 - Hasil tes: **238 passed, 3 warnings** (82 tes baru Phase 5 + 156 tes regresi; 2 warning sporadic
   libpyside + 1 `qt_api`).
 - Status fitur C1–C6: **TESTED** (belum VERIFIED; menunggu verifikasi/penerimaan pengguna).
+
+## [0.7.0] — Metro UI Redesign (Visual)
+
+### Added
+- `src/office_toolkit/ui/styles/tokens.py` — token desain tunggal (warna, spasi, radius,
+  tipografi, warna kategori). Semua QSS komponen membaca dari sini.
+- `src/office_toolkit/ui/styles/icons.py` — pabrik ikon berbasis `QPainter` (tanpa aset biner,
+  tanpa dependensi baru): `icon()`, `pixmap()`, `app_logo()`, `app_icon()`.
+- `src/office_toolkit/ui/tools.py` — registri alat (29 entri) sebagai sumber tunggal untuk
+  petak dasbor dan pencarian; entri yang belum ada ditandai `available=False`.
+- `src/office_toolkit/ui/components/tile.py` — `MetroTile` (petak berwarna, fokus keyboard,
+  keadaan "BELUM TERSEDIA" untuk fitur yang belum dibuat).
+- `src/office_toolkit/ui/components/header.py` — `Header` (judul/deskripsi halaman, pencarian
+  alat global, lencana status offline).
+- `tests/ui/test_metro_ui.py` (9) — petak untuk setiap alat, filter pencarian, keadaan kosong,
+  sinyal klik petak, item sidebar non-aktif, pencarian memindah ke dasbor, ikon jendela.
+
+### Changed
+- `src/office_toolkit/ui/styles/theme.py` — QSS dibangun dari token; `apply_theme()` memasang gaya
+  Fusion, font Metro, stylesheet, dan ikon jendela. **Sebelumnya QSS ada tetapi tidak pernah dipakai.**
+- `src/office_toolkit/ui/navigation.py` — sidebar bergaya Metro: blok merek, 5 entri halaman
+  berikon, bagian "Segera Hadir" non-aktif, footer versi/offline. API `page_requested`,
+  `setCurrentRow`, `currentRow` dipertahankan.
+- `src/office_toolkit/ui/dashboard.py` — dari label kosong menjadi petak Metro yang dikelompokkan
+  per kategori, dengan pencarian nyata (memfilter registri) dan keadaan kosong informatif.
+- `src/office_toolkit/ui/main_window.py` — tata letak sidebar + header + `QStackedWidget`;
+  petak/panel pencarian terhubung ke halaman & tab nyata; ikon jendela dipasang.
+- `src/office_toolkit/bootstrap.py` — memanggil `apply_theme(app)` dan memasang ikon jendela.
+- `src/office_toolkit/ui/components/file_selector.py`, `folder_selector.py`,
+  `services/{pdf/ui.py,pdf/advanced_ui.py,qr/ui.py,images/ui.py}` — gaya inline ditokenkan
+  menjadi `objectName` (`secondaryButton`, `pageTitle`, `hintText`, `warningText`, `previewBox`).
+- `tests/ui/test_ui_smoke.py` — `test_dashboard_search_filters` kini benar-benar menguji filter.
+- `tests/unit/test_smoke.py` — `test_version_matches_pyproject` membandingkan `__version__`
+  dengan `pyproject.toml` (mencegah versi menyimpang lagi).
+- `pyproject.toml`, `src/office_toolkit/__init__.py` — versi 0.6.0 → 0.7.0.
+
+### Notes
+- Hanya perubahan visual/keterpaduan; tidak ada logika bisnis, arsitektur lapisan, atau dependensi
+  baru. Tombol tanpa handler tidak ditambahkan; fitur yang belum ada ditandai eksplisit.
+- **Flaky pra-ada (bukan regresi):** `tests/integration/test_qr_integration.py` kadang menabrak
+  proses (exit 127) karena interaksi `QThread` (`JobManager`) + OpenCV di bawah capture pytest.
+  Terbukti flaky juga pada basis tanpa perubahan ini (dijalankan 3×: 2 lulus, 1 gagal).
+- Hasil tes: **250 passed** dengan `test_qr_integration.py` dikecualikan (flaky di atas);
+  semua tes UI/unit/security/integrasi lain hijau.
+
+## [0.6.0] — Image Toolkit (B1/B2/B8) + Sinkronisasi Dokumen
+
+### Added
+- `src/office_toolkit/services/images/ui.py` — halaman "Image Toolkit" berbahasa Indonesia dengan
+  tiga tab nyata: **Info** (format, dimensi, ukuran, transparansi), **Konversi** (PNG/JPEG/WebP/
+  BMP/TIFF, kualitas, opsi hapus metadata), dan **Resize** (lebar jaga rasio aspek atau persentase,
+  format keluaran). Operasi berat lewat `JobManager`; memakai ulang `processor` yang sudah ada.
+- `tests/ui/test_image_ui.py` (5) — 3 tab, navigasi ke halaman (index 4), dispatch job, info
+  dimensi, dan konversi menulis file.
+- `tests/unit/test_image.py` — tambah tes hapus metadata (B8) dan penolakan file tidak ada.
+
+### Changed
+- `src/office_toolkit/ui/navigation.py` — entri "Image Toolkit" (index 4).
+- `src/office_toolkit/ui/main_window.py` — `ImageToolkitPage` ditambahkan ke `QStackedWidget`.
+- `tests/ui/test_pdf_ui.py`, `test_pdf_advanced_ui.py`, `test_qr_ui.py` — jumlah halaman stack
+  kini 5 (regresi 4→5, diperbarui jujur).
+- `docs/FEATURE_MATRIX.md` — Modul B dikoreksi: B1/B2/B8 **IMPLEMENTED + TESTED** (sebelumnya salah
+  tertulis NOT IMPLEMENTED meski `processor` sudah ada); status dokumen 0.6.
+- `AGENTS.md` — status ringkasan ke Phase 5, QR decode `opencv-python-headless`, environment
+  diperbarui (qrcode/opencv/numpy terpasang; pypdf & pytest-qt belum).
+- `pyproject.toml` — versi 0.1.0 → 0.6.0 (sinkron dengan changelog).
+
+### Notes
+- Modul B belum lengkap: B3/B4/B5/B6/B7/B9/B10/B11 tetap **NOT IMPLEMENTED** dan ditandai eksplisit.
+- Hasil tes: **245 passed, 2 warnings** (5 tes UI baru + 2 tes unit baru + 238 regresi).
+- Status fitur B1/B2/B8: **TESTED** (belum VERIFIED; menunggu verifikasi/penerimaan pengguna).

@@ -46,7 +46,7 @@ def test_qr_page_has_three_tabs(app):
 
 def test_main_window_qr_navigation(app):
     win = MainWindow(AppConfig())
-    assert win.stack.count() == 4
+    assert win.stack.count() == 5
     assert win.stack.widget(3).objectName() == "qrPage"
     win.nav.setCurrentRow(3)
     assert win.stack.currentIndex() == 3

@@ -89,12 +89,13 @@ class QrToolkitPage(QWidget):
 
         layout = QVBoxLayout(self)
         title = QLabel("QR Toolkit")
-        title.setStyleSheet("font-size: 18px; font-weight: bold;")
+        title.setObjectName("pageTitle")
         layout.addWidget(title)
         desc = QLabel(
             "Buat QR Code, buat massal dari CSV, dan baca QR dari gambar "
             "(lokal/offline, tanpa membuka tautan otomatis)."
         )
+        desc.setObjectName("pageDesc")
         layout.addWidget(desc)
 
         tabs = QTabWidget()
@@ -156,12 +157,12 @@ class QrToolkitPage(QWidget):
         self.gen_preview.setFixedWidth(_PREVIEW_MAX + 140)
         self.gen_preview.setMinimumHeight(_PREVIEW_MAX)
         self.gen_preview.setAlignment(Qt.AlignCenter)
-        self.gen_preview.setStyleSheet("border: 1px dashed #999;")
+        self.gen_preview.setObjectName("previewBox")
         self.gen_preview.setToolTip("Pratinjau: QR yang benar-benar dihasilkan dari data Anda.")
         v.addWidget(self.gen_preview)
         self.gen_warn = QLabel("")
         self.gen_warn.setWordWrap(True)
-        self.gen_warn.setStyleSheet("color: #b05e00;")
+        self.gen_warn.setObjectName("warningText")
         v.addWidget(self.gen_warn)
 
         d_row = _row()
@@ -337,7 +338,7 @@ class QrToolkitPage(QWidget):
 
         self.csv_preview = QLabel("Pilih file CSV untuk melihat pratinjau kolom & baris.")
         self.csv_preview.setWordWrap(True)
-        self.csv_preview.setStyleSheet("color: #555;")
+        self.csv_preview.setObjectName("hintText")
         v.addWidget(self.csv_preview)
 
         d_row = _row()
@@ -483,7 +484,7 @@ class QrToolkitPage(QWidget):
         self.dec_preview = QLabel("Belum ada gambar.")
         self.dec_preview.setMinimumHeight(_PREVIEW_MAX)
         self.dec_preview.setAlignment(Qt.AlignCenter)
-        self.dec_preview.setStyleSheet("border: 1px dashed #999;")
+        self.dec_preview.setObjectName("previewBox")
         v.addWidget(self.dec_preview)
         self.dec_selector.files_changed.connect(self._update_decode_preview)
 
@@ -492,7 +493,7 @@ class QrToolkitPage(QWidget):
             "dan tautan di dalam QR tidak akan dibuka otomatis."
         )
         note.setWordWrap(True)
-        note.setStyleSheet("color: #555;")
+        note.setObjectName("hintText")
         v.addWidget(note)
 
         btn = QPushButton("Baca QR")

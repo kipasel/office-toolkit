@@ -96,12 +96,13 @@ class PdfAdvancedPage(QWidget):
 
         layout = QVBoxLayout(self)
         title = QLabel("PDF Toolkit Lanjutan")
-        title.setStyleSheet("font-size: 18px; font-weight: bold;")
+        title.setObjectName("pageTitle")
         layout.addWidget(title)
         desc = QLabel(
             "Kompresi, konversi halaman, gambar & teks, anotasi, tanda tangan, dan "
             "proteksi kata sandi (lokal/offline)."
         )
+        desc.setObjectName("pageDesc")
         layout.addWidget(desc)
 
         tabs = QTabWidget()
@@ -158,7 +159,7 @@ class PdfAdvancedPage(QWidget):
 
         self.compress_warn = QLabel("")
         self.compress_warn.setWordWrap(True)
-        self.compress_warn.setStyleSheet("color: #b05e00;")
+        self.compress_warn.setObjectName("warningText")
         v.addWidget(self.compress_warn)
 
         q_row = _row()
@@ -830,7 +831,7 @@ class PdfAdvancedPage(QWidget):
                       "bersertifikat. Tidak menjamin identitas penandatangan, integritas "
                       "kriptografis, atau keaslian dokumen.")
         note.setWordWrap(True)
-        note.setStyleSheet("color: #b05e00;")
+        note.setObjectName("warningText")
         v.addWidget(note)
 
         v.addWidget(QLabel("Folder tujuan:"))
@@ -1015,7 +1016,7 @@ class PdfAdvancedPage(QWidget):
         warn = QLabel("Setelah dibuka, file hasil TIDAK lagi dilindungi enkripsi sumber "
                       "dan dapat dibuka siapa saja yang memegang filenya.")
         warn.setWordWrap(True)
-        warn.setStyleSheet("color: #b05e00;")
+        warn.setObjectName("warningText")
         v.addWidget(warn)
 
         v.addWidget(QLabel("Folder tujuan:"))

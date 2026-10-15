@@ -61,10 +61,11 @@ office-toolkit/
 │   │   ├── main_window.py
 │   │   ├── navigation.py
 │   │   ├── dashboard.py
-│   │   ├── components/      # widget generik (file picker, preview, progress)
+│   │   ├── tools.py         # registri alat (petak + pencarian)
+│   │   ├── components/      # widget generik (file picker, tile, header, preview, progress)
 │   │   ├── dialogs/         # dialog konfirmasi/error
 │   │   ├── pages/           # satu halaman per fitur
-│   │   └── styles/          # QSS lokal + ikon
+│   │   └── styles/          # token + QSS + ikon (QPainter, tanpa aset biner)
 │   ├── services/
 │   │   ├── pdf/
 │   │   ├── images/
@@ -106,8 +107,9 @@ Aturan: bukan satu file besar; setiap service punya tanggung jawab tunggal dan d
   `os.replace`) → kembalikan hasil terstruktur. Dokumen baru dibentuk via `insert_pdf` (termasuk
   rebuild pada buka proteksi), sehingga outline/metadata tidak dijamin dipertahankan (kecuali
   rotate yang memodifikasi salinan).
-- `images/` — `convert`, `resize`, `compress`, `target_size`, `crop`, `rotate`, `batch`,
-  `strip_metadata`, `exif`.
+- `images/` — **PARTIAL** `processor.py` (**IMPLEMENTED**: `get_info`, `convert` (dengan opsi
+  hapus metadata), `resize`). `ui.py` menyediakan 3 tab (Info, Konversi, Resize). **Belum
+  dibuat**: `compress` khusus, `target_size`, `crop`, `rotate`, `batch`, `exif` orientation.
 - `qr/` — **IMPLEMENTED** (Phase 5): `common.py` (validasi input, warna `#RRGGBB`, kontras WCAG,
   path output aman, tulis terverifikasi), `generator.py` (generate PNG/SVG C1–C4), `csv_batch.py`
   (batch CSV C5), `decoder.py` (baca QR C6). `ui.py` menyediakan 3 tab (Buat QR, Batch CSV, Baca
@@ -122,12 +124,19 @@ Setiap fungsi service: validasi input → proses → tulis via `OutputManager` �
 terstruktur (`Result` dengan path, ukuran, peringatan).
 
 ### ui
-- `main_window.py` — shell: sidebar + stacked workspace.
-- `navigation.py` — sidebar, kategori.
-- `dashboard.py` — pencarian tool + kartu kategori.
+- `main_window.py` — shell: sidebar (`Navigation`) + `Header` + `QStackedWidget` workspace;
+  menerjemahkan klik petak/pencarian menjadi pemilihan halaman & tab nyata.
+- `navigation.py` — sidebar Metro: merek, 5 entri halaman berikon, bagian "Segera Hadir"
+  non-aktif, footer versi/offline. Menjaga API `page_requested`/`setCurrentRow`/`currentRow`.
+- `dashboard.py` — petak `MetroTile` yang dikelompokkan per kategori + pencarian nyata
+  (memfilter `tools.TOOLS`) dan keadaan kosong informatif.
+- `tools.py` — registri `Tool`/`Category` (sumber tunggal untuk petak & pencarian); entri yang
+  belum ada ditandai `available=False` (tidak pernah menyamar sebagai fitur selesai).
 - `pages/` — satu halaman per fitur; hanya memanggil service via worker.
-- `components/` — `FileSelector`, `FolderSelector`, `ResultPreview`, `ProgressPanel`, `StatusBadge`.
-- `styles/` — QSS lokal, ikon/font lokal.
+- `components/` — `FileSelector`, `FolderSelector`, `MetroTile`, `Header`, `ResultPreview`,
+  `ProgressPanel`, `StatusBadge`.
+- `styles/` — `tokens.py` (warna/spasi/radius/tipografi), `theme.py` (`build_qss()` + `apply_theme()`),
+  `icons.py` (ikon `QPainter`, tanpa file biner). Aturan: widget membaca token, bukan nilai hard-code.
 
 ## 4. Model Eksekusi Job
 

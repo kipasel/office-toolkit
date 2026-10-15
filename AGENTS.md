@@ -9,7 +9,10 @@ Bacalah dokumen ini lebih dahulu sebelum mengubah apa pun.
 QR Code, dan utilitas file kantor. Fokus utama: hasil pemrosesan yang benar, privasi file, stabilitas,
 dan pengujian yang dapat diulang.
 
-Status saat ini: **PHASE 0 (Audit & Perencanaan)**. Belum ada kode aplikasi.
+Status saat ini: **PHASE 6 (Metro UI Redesign)** — kode aplikasi sudah ada. Fondasi/UI, PDF Toolkit
+Dasar (A1–A7), PDF Toolkit Lanjutan (A8–A14), QR Toolkit (C1–C6), dan Image Toolkit
+(B1/B2/B8 — info/konversi/resize) **TESTED** (belum VERIFIED). Phase 6 menata ulang tampilan
+(sidebar, header, dasbor petak) tanpa mengubah logika bisnis. Modul lain menyusul.
 Lihat `docs/CHANGELOG.md` untuk riwayat dan `docs/FEATURE_MATRIX.md` untuk status fitur.
 
 ## 2. Sumber Kebenaran (Source of Truth)
@@ -49,7 +52,9 @@ persetujuan pengguna (lihat bagian 10).
 - PDF: **PyMuPDF** (manipulasi) dan **pypdf** (operasi struktural/ringan).
 - Gambar: **Pillow**.
 - QR generate: **qrcode**.
-- QR decode: **zxing-cpp** (diplih daripada OpenCV; alasan & ukuran di `docs/SPECIFICATION.md`).
+- QR decode: **opencv-python-headless** (`QRCodeDetector`). Menggantikan **zxing-cpp** karena
+  import `.pyd`-nya diblokir Smart App Control pada mesin pengembangan; keputusan disetujui
+  pengguna dan dicatat di `docs/SPECIFICATION.md` §3.3/§12. (Menambah `numpy`.)
 - Tes: **pytest**, **pytest-qt**.
 - Distribusi: **PyInstaller**.
 
@@ -80,8 +85,9 @@ Daftar versi terkunci ada di `docs/SPECIFICATION.md`. Jangan mengarang nomor ver
   `C:\Users\Teknis KIP\AppData\Local\Programs\Python\Python312\python.exe` (Python 3.12.0).
 - `python`/`pip` tidak ada di PATH; gunakan **`py -3.12 -m pip ...`**.
 - Terpasang (3.12): PySide6 6.11.2, PyMuPDF 1.28.2, Pillow 11.3.0, pikepdf 9.11.0,
-  pytest 9.1.1, PyInstaller 6.21.0.
-- Belum terpasang (3.12): pypdf, qrcode, zxing-cpp, pytest-qt.
+  pytest 9.1.1, PyInstaller 6.21.0, qrcode 8.2, opencv-python-headless 4.11.0.86, numpy 2.5.4.
+- Belum terpasang (3.12): pypdf, pytest-qt. Tes UI memakai `QApplication` offscreen manual
+  (`QT_QPA_PLATFORM=offscreen`) selama pytest-qt belum dipasang.
 - Python 3.14.6 juga ada di `C:\Python314` — **jangan** dipakai untuk proyek ini.
 
 Perintah standar (lihat juga `scripts/`):

@@ -176,13 +176,23 @@ $env:QT_QPA_PLATFORM="offscreen"
 py -3.12 -m pytest
 ```
 
-Hasil terakhir: **238 passed, 3 warnings** (82 tes baru Phase 5 + 156 tes regresi; warning =
-`qt_api` tidak dikenal di `pyproject.toml` dan 2 peringatan sporadic libpyside pada penutupan
-QApplication).
+Hasil terakhir: **245 passed, 2 warnings** (warning = `qt_api` tidak dikenal di `pyproject.toml`
+dan peringatan sporadic libpyside pada penutupan QApplication).
 
-### 5.3 Gambar (Phase 3)
-- Konversi format → file hasil dapat dibuka ulang oleh decoder yang benar.
-- Resize → dimensi sesuai (piksel/persentase).
+### 5.2d Image Toolkit (B1/B2/B8) — TESTED
+- B1 Konversi: PNG→JPEG menghasilkan mode RGB dan file dapat dibuka ulang; header PNG dideteksi
+  lewat decoder nyata (bukan ekstensi). **TESTED**
+- B2 Resize: lebar jaga rasio aspek (100×50 → 50×25) dan persentase (100×100 @50% → 50×50). **TESTED**
+- B8 Hapus metadata: metadata PNG dihapus saat konversi dengan opsi aktif. **TESTED**
+- Info: `get_info` melaporkan dimensi; file tidak ada → `ValidationError`. **TESTED**
+- UI: halaman "Image Toolkit" punya 3 tab (Info/Konversi/Resize); navigasi utama sampai index 4;
+  dispatch job via worker; tab Info menampilkan dimensi; tab Konversi menulis file. **TESTED**
+
+### 5.3 Gambar — sisa Modul B (belum diimplementasikan)
+Fitur berikut masih **NOT IMPLEMENTED** dan ditandai eksplisit; kriteria di bawah berlaku saat
+diimplementasikan. B1/B2/B8 sudah diuji di §5.2d.
+- Konversi format → file hasil dapat dibuka ulang oleh decoder yang benar. (B1: TESTED)
+- Resize → dimensi sesuai (piksel/persentase). (B2: TESTED)
 - Transparansi → dipertahankan untuk PNG/WebP.
 - EXIF orientation → diterapkan benar.
 - Batch → laporan jumlah sukses & gagal akurat.

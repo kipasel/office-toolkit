@@ -24,8 +24,14 @@ def test_main_window_created(app):
 
 def test_dashboard_search_filters(app):
     from office_toolkit.ui.dashboard import Dashboard
+    from office_toolkit.ui.components.tile import MetroTile
     d = Dashboard()
-    assert d is not None
+    d.show()
+    d.apply_filter("qr")
+    visible = {t.tool.id for t in d.findChildren(MetroTile) if t.isVisible()}
+    assert visible and all("qr" in t for t in visible)
+    d.apply_filter("zzz-tidak-ada")
+    assert not any(t.isVisible() for t in d.findChildren(MetroTile))
     if hasattr(d, 'close'):
         d.close()
 

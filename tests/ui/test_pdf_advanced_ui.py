@@ -29,7 +29,7 @@ def test_advanced_page_has_nine_tabs(app):
 
 def test_main_window_reaches_advanced_page(app):
     win = MainWindow(AppConfig())
-    assert win.stack.count() == 4
+    assert win.stack.count() == 5
     assert win.stack.widget(2).objectName() == "pdfAdvancedPage"
     win.nav.setCurrentRow(2)
     assert win.stack.currentIndex() == 2

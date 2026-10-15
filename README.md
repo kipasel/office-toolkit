@@ -3,11 +3,31 @@
 Aplikasi desktop Windows yang mengolah **PDF, gambar, QR Code, dan utilitas file kantor**.
 Semua fitur inti berjalan **lokal/offline** dan **tanpa telemetry**.
 
-> **Status: PHASE 5 — QR Toolkit (IMPLEMENTED, TESTED).**
+> **Status: PHASE 6 — Metro UI Redesign (IMPLEMENTED, TESTED).**
 > Fondasi aplikasi, UI, PDF Toolkit Dasar (info, merge, split, extract, reorder, rotate), PDF
 > Toolkit Lanjutan (kompresi, PDF↔gambar, teks/gambar/anotasi/tanda tangan gambar, proteksi & buka
-> proteksi), dan QR Toolkit (generate, desain & logo, ekspor PNG/SVG, batch CSV, baca QR) siap dan
-> teruji. Modul gambar/utilitas lanjutan menyusul pada fase berikutnya.
+> proteksi), QR Toolkit (generate, desain & logo, ekspor PNG/SVG, batch CSV, baca QR), dan Image
+> Toolkit (info, konversi format, ubah ukuran) siap dan teruji. Phase 6 menata ulang tampilan
+> (sidebar, header, dasbor petak dengan pencarian) tanpa mengubah logika bisnis. Sub-fitur gambar
+> lainnya (compress khusus, target KB, crop, rotate, batch, orientasi EXIF) menyusul pada fase
+> berikutnya.
+
+## Tampilan (Metro UI)
+
+- **Sidebar** bernavigasi 5 halaman (Beranda, PDF, PDF Lanjutan, QR Code, Gambar) dengan bagian
+  "Segera Hadir" yang non-aktif dan jelas.
+- **Header** menampilkan judul/deskripsi halaman, pencarian alat global, dan lencana status offline.
+- **Dasbor petak** mengelompokkan semua alat per kategori; petak yang belum dibuat ditandai
+  "BELUM TERSEDIA" (tidak pernah berfungsi palsu).
+- Seluruh gaya bersumber dari token tunggal (`ui/styles/tokens.py`); ikon digambar dengan
+  `QPainter` (tanpa aset biner, tanpa dependensi baru).
+
+## Fitur Image Toolkit
+
+- **Info gambar**: format, dimensi (lebar×tinggi), ukuran file, dan status transparansi.
+- **Konversi format**: PNG/JPEG/WebP/BMP/TIFF, dengan pengaturan kualitas (JPEG/WebP) dan opsi
+  hapus metadata.
+- **Resize**: berdasarkan lebar (jaga rasio aspek) atau persentase dari ukuran asli.
 
 ## Fitur QR Toolkit
 
@@ -93,5 +113,6 @@ $env:QT_QPA_PLATFORM="offscreen"
 ```
 
 Tanpa virtualenv (paket PDF/UI sudah terpasang di Python 3.12): jalankan dengan `PYTHONPATH=src`
-dan pastikan dependensi tersedia. Halaman PDF Toolkit diakses melalui sidebar "PDF Toolkit" dan
-"PDF Lanjutan"; halaman "QR Toolkit" menyediakan Buat QR, Batch dari CSV, dan Baca QR.
+dan pastikan dependensi tersedia. Sidebar menyediakan halaman "Beranda" (dasbor petak + pencarian),
+"PDF", "PDF Lanjutan", "QR Code" (Buat QR, Batch dari CSV, Baca QR), dan "Gambar"
+(Info, Konversi, Resize).

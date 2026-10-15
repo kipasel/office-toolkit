@@ -1,6 +1,6 @@
 # FEATURE_MATRIX.md — Matriks Fitur & Status
 
-Status: 0.5 (Phase 5 — QR Toolkit)
+Status: 0.6 (Phase 5 — QR Toolkit + Image Toolkit B1/B2/B8)
 Legenda status: **NOT IMPLEMENTED** · **IMPLEMENTED** · **TESTED** · **VERIFIED** · **BLOCKED**
 Legenda tes: `—` belum ada.
 
@@ -69,20 +69,25 @@ rename).
 - Proteksi kata sandi ≠ jaminan absolut; izin dokumen bersifat himbauan, penegakannya bergantung viewer.
 
 
-## Modul B — Image Toolkit (Phase 3)
+## Modul B — Image Toolkit
+
+Implementasi: `src/office_toolkit/services/images/{processor,ui}.py`. Operasi memakai Pillow,
+berjalan lokal/offline, dan menulis hasil lewat `OutputManager` (anti-overwrite). Halaman
+"Image Toolkit" menyediakan tiga tab nyata: **Info**, **Konversi**, dan **Resize**. Sisa
+sub-fitur Modul B (compress khusus, target KB, crop, rotate, batch, orientasi EXIF) belum dibuat.
 
 | ID | Fitur | Status | Tes | Catatan |
 |---|---|---|---|---|
-| B1 | Konversi format | NOT IMPLEMENTED | — | |
-| B2 | Resize (piksel/persentase) | NOT IMPLEMENTED | — | |
-| B3 | Compress (kualitas) | NOT IMPLEMENTED | — | |
+| B1 | Konversi format | IMPLEMENTED | TESTED | PNG/JPEG/WebP/BMP/TIFF; transparansi di-flatten ke putih saat JPEG |
+| B2 | Resize (piksel/persentase) | IMPLEMENTED | TESTED | lebar jaga rasio aspek atau persentase; LANCZOS |
+| B3 | Compress (kualitas) | NOT IMPLEMENTED | — | kontrol kualitas ada di tab Konversi (JPEG/WebP), belum alat compress tersendiri |
 | B4 | Target ukuran file (KB) | NOT IMPLEMENTED | — | |
 | B5 | Crop manual | NOT IMPLEMENTED | — | |
 | B6 | Rotate | NOT IMPLEMENTED | — | |
 | B7 | Batch convert & resize | NOT IMPLEMENTED | — | |
-| B8 | Hapus metadata | NOT IMPLEMENTED | — | |
-| B9 | Pratinjau & ukuran sebelum/sesudah | NOT IMPLEMENTED | — | |
-| B10 | Penanganan transparansi | NOT IMPLEMENTED | — | |
+| B8 | Hapus metadata | IMPLEMENTED | TESTED | opsi "Hapus metadata (EXIF)" pada tab Konversi (PNG/JPEG/WebP/TIFF) |
+| B9 | Pratinjau & ukuran sebelum/sesudah | NOT IMPLEMENTED | — | ukuran sebelum/sesudah dilaporkan, pratinjau visual belum ada |
+| B10 | Penanganan transparansi | NOT IMPLEMENTED | — | transparansi dipertahankan untuk PNG/WebP; belum alat khusus |
 | B11 | Orientasi EXIF | NOT IMPLEMENTED | — | |
 
 ## Modul C — QR Code (Phase 5)

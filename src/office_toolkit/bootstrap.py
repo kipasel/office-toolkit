@@ -6,6 +6,8 @@ from PySide6.QtWidgets import QApplication
 from office_toolkit.core.config import AppConfig, get_config
 from office_toolkit.core.logging_config import setup_logging
 from office_toolkit.ui.main_window import MainWindow
+from office_toolkit.ui.styles.theme import apply_theme
+from office_toolkit.ui.styles import icons
 
 
 def bootstrap() -> QApplication:
@@ -24,7 +26,10 @@ def bootstrap() -> QApplication:
     app.setOrganizationName("OfficeToolkit")
     app.setApplicationDisplayName("Office Toolkit")
 
+    apply_theme(app)
+
     window = MainWindow(config)
+    window.setWindowIcon(icons.app_icon(64))
     window.show()
     app._main_window = window
 

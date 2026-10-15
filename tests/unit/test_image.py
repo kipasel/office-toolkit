@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from PIL import Image
+from PIL import Image, PngImagePlugin
 
 from office_toolkit.services.images import processor
 
@@ -37,3 +37,26 @@ def test_get_info(tmp_path):
     info = processor.get_info(f)
     assert info.width == 5
     assert info.height == 6
+
+
+def test_convert_removes_metadata(tmp_path):
+    f = tmp_path / "meta.png"
+    meta = PngImagePlugin.PngInfo()
+    meta.add_text("Comment", "rahasia")
+    Image.new("RGB", (12, 12), "red").save(f, pnginfo=meta)
+    with Image.open(f) as im:
+        assert im.info.get("Comment") == "rahasia"
+    res = processor.convert_image(f, tmp_path, "png", remove_metadata=True)
+    with Image.open(res.output) as out:
+        assert "Comment" not in out.info
+
+
+def test_get_info_rejects_missing_file(tmp_path):
+    from office_toolkit.core.errors import ValidationError
+
+    try:
+        processor.get_info(tmp_path / "tidak-ada.png")
+    except ValidationError:
+        pass
+    else:  # pragma: no cover
+        raise AssertionError("expected ValidationError for missing file")

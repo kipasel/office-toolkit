@@ -58,11 +58,12 @@ class PdfToolkitPage(QWidget):
 
         layout = QVBoxLayout(self)
         title = QLabel("PDF Toolkit")
-        title.setStyleSheet("font-size: 18px; font-weight: bold;")
+        title.setObjectName("pageTitle")
         layout.addWidget(title)
         desc = QLabel(
             "Info, merge, split, ekstrak, susun ulang, dan rotasi halaman PDF (lokal/offline)."
         )
+        desc.setObjectName("pageDesc")
         layout.addWidget(desc)
 
         tabs = QTabWidget()
