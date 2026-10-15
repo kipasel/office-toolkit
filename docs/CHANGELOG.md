@@ -187,11 +187,11 @@ Format mengikuti prinsip Keep a Changelog; versi mengikuti SemVer.
 ### Notes
 - Hanya perubahan visual/keterpaduan; tidak ada logika bisnis, arsitektur lapisan, atau dependensi
   baru. Tombol tanpa handler tidak ditambahkan; fitur yang belum ada ditandai eksplisit.
-- **Flaky pra-ada (bukan regresi):** `tests/integration/test_qr_integration.py` kadang menabrak
+- **Flaky pra-ada (bukan regresi):** `tests/integration/test_qr_integration.py` sebelumnya kadang menabrak
   proses (exit 127) karena interaksi `QThread` (`JobManager`) + OpenCV di bawah capture pytest.
-  Terbukti flaky juga pada basis tanpa perubahan ini (dijalankan 3×: 2 lulus, 1 gagal).
-- Hasil tes: **250 passed** dengan `test_qr_integration.py` dikecualikan (flaky di atas);
-  semua tes UI/unit/security/integrasi lain hijau.
+  Crash tersebut diperbaiki di Phase 7 (siklus hidup `JobManager`/`QThread`); tidak lagi teramati dalam
+  pengujian berulang.
+- Hasil tes: **256 passed, 1 warning** (254+2 regresi baru untuk `JobManager`). Integrasi sekarang stabil.
 
 ## [0.6.0] — Image Toolkit (B1/B2/B8) + Sinkronisasi Dokumen
 
